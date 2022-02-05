@@ -38,7 +38,7 @@ public class App {
 //            e.printStackTrace();
 //        }
 
-        HashMap<String, List<FieldSchema>> schemas = new HashMap<>();
+        HashMap<String, Set<String>> schemas = new HashMap<>();
 
         while (true) {
             ConsumerRecords<String,byte[]> records = consumer.poll(Duration.ofMillis(
@@ -52,22 +52,9 @@ public class App {
                 }
                 JSONObject msg = new JSONObject(f.getMessage());
                 List<String> cols = new ArrayList<>();
-                reduceSchema(cols, msg);
+                reduceSchema(cols, msg, "");
             }
         }
-    }
-
-    private static void reduceSchema(List<String> cols, JSONObject obj) {
-        obj.keys().forEachRemaining(key -> {
-            key = snakeCase(key);
-            if (!checkPredicate(cols, key)) {
-                //throw away the record
-                return;
-            }
-            if (obj.get(key) instanceof JSONObject) {
-                reduceSchema(cols, (JSONObject) obj.get(key), key);
-            }
-        });
     }
 
     private static void reduceSchema(List<String> cols, JSONObject obj, String prefix) {
